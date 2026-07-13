@@ -1,2 +1,33 @@
 # Speak-IP-Address-for-ASL3
 Make your AllStarLink Node speak it's Local IP address on reboot
+## Installation Instructions
+
+First it's alway good to start at the profile root directory
+```
+cd ~
+```
+
+Then we need to download the installation script file
+```
+Github download Link
+```
+Then we need to make it executable
+```
+sudo chmod +x install-speakip-v1.0.6.sh
+```
+Then execute the installer script
+```
+sudo ./install-speakip-v1.0.6.sh
+```
+Once you run the script installer it will ask for your Node number for the node it is being installed on. Once the script installer is finished it will ask if you want to play the local IP and you can answer yes or no
+<br>
+Once fininshed every time you reboot your node will play your local IP address over RF. And now you can play the local IP or the Public IP address at will with DTMF commands, AND you will have the ability to reboot or shutdown your node with two different DTMF commands listed here:
+  *890 = Shutdown AllStar Node
+  *891 = Reboot AllStar Node
+  *892 = Speak Local IP address
+  *893 = Speak Public IP address 
+
+<br>
+I hope you get some use from this setup
+73 and Ham On Y'all!!
+
