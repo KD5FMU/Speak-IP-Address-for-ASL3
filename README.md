@@ -9,7 +9,7 @@ cd ~
 
 Then we need to download the installation script file
 ```
-Github download Link
+sudo wget https://raw.githubusercontent.com/KD5FMU/Speak-IP-Address-for-ASL3/refs/heads/main/install-speakip-v1.0.9.sh
 ```
 Then we need to make it executable
 ```
@@ -17,7 +17,7 @@ sudo chmod +x install-speakip-v1.0.6.sh
 ```
 Then execute the installer script
 ```
-sudo ./install-speakip-v1.0.6.sh
+sudo ./install-speakip-v1.0.9.sh
 ```
 Once you run the script installer it will ask for your Node number for the node it is being installed on. Once the script installer is finished it will ask if you want to play the local IP and you can answer yes or no
 <br>
