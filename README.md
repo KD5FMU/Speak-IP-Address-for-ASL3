@@ -27,7 +27,9 @@ Once fininshed every time you reboot your node will play your local IP address o
   *891 = Reboot AllStar Node<br>
   *892 = Speak Local IP address<br>
   *893 = Speak Public IP address<br>
-
+<br>
+Last but not least you may need to make this slight modification to /etc/asterisk/rpt.conf
+![rptLOGO](https://github.com/KD5FMU/Speak-IP-Address-for-ASL3/blob/main/rpt-conf.png)
 <br>
 I hope you get some use from this setup
 73 and Ham On Y'all!!
