@@ -13,7 +13,7 @@ sudo wget https://raw.githubusercontent.com/KD5FMU/Speak-IP-Address-for-ASL3/ref
 ```
 Then we need to make it executable
 ```
-sudo chmod +x install-speakip-v1.0.6.sh
+sudo chmod +x install-speakip-v1.0.9.sh
 ```
 Then execute the installer script
 ```
