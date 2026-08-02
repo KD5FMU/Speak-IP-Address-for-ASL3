@@ -17,15 +17,15 @@ cd ~
 
 Then we need to download the installation script file
 ```
-sudo wget https://raw.githubusercontent.com/KD5FMU/Speak-IP-Address-for-ASL3/refs/heads/main/install-speakip-v1.0.9.sh
+sudo wget https://raw.githubusercontent.com/KD5FMU/Speak-IP-Address-for-ASL3/refs/heads/main/install-speakip-v1.0.10.sh
 ```
 Then we need to make it executable
 ```
-sudo chmod +x install-speakip-v1.0.9.sh
+sudo chmod +x install-speakip-v1.0.10.sh
 ```
 Then execute the installer script
 ```
-sudo ./install-speakip-v1.0.9.sh
+sudo ./install-speakip-v1.0.10.sh
 ```
 Once you run the script installer it will ask for your Node number for the node it is being installed on. Once the script installer is finished it will ask if you want to play the local IP and you can answer yes or no
 <br>
@@ -36,6 +36,13 @@ Once fininshed every time you reboot your node will play your local IP address o
   *892 = Speak Local IP address<br>
   *893 = Speak Public IP address<br>
 <br>
+If your AllScan Dashboard lost access ro rpt.conf from the last version then you can download this latest version installer script and run it like this to fix your current install without having to do it all over again.
+```
+sudo ./install-speakip-v1.0.10.sh --repair-rptconf-permissions
+```
+<br>
+
+
 Last but not least you may need to make this slight modification to /etc/asterisk/rpt.conf
 ![rptLOGO](https://github.com/KD5FMU/Speak-IP-Address-for-ASL3/blob/main/rpt-conf.png)
 <br>
