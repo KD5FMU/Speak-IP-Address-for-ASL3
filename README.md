@@ -43,7 +43,7 @@ sudo ./install-speakip-v1.0.10.sh --repair-rptconf-permissions
 <br>
 
 
-Last but not least you may need to make this slight modification to /etc/asterisk/rpt.conf
+## Last but not least you may need to make this slight modification to /etc/asterisk/rpt.conf
 ![rptLOGO](https://github.com/KD5FMU/Speak-IP-Address-for-ASL3/blob/main/rpt-conf.png)
 <br>
 I hope you get some use from this setup
