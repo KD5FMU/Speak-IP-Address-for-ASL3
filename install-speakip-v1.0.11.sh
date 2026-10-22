@@ -16,6 +16,7 @@
 # Version 1.0.11:
 #   - Adds *894 using native ASL3 ilink,6 to disconnect all linked nodes.
 #   - Includes 894 in conflict checks, repeat installs, and uninstall cleanup.
+#   - Adds --update for existing installations without reinstalling packages or helpers.
 #   - Checks every matching DTMF entry so duplicate definitions cannot hide conflicts.
 #
 # Version 1.0.10:
@@ -794,6 +795,28 @@ run_test_prompt() {
   fi
 }
 
+update_speakip() {
+  check_platform
+  [[ -r "$CONFIG_FILE" ]] || die "$CONFIG_FILE was not found or is unreadable. Run the full installer first."
+
+  # Read the saved node as data, never source a configuration file as root.
+  local node file
+  node="$(awk -F= '$1 == "NODE" { print substr($0, 6) }' "$CONFIG_FILE")"
+  validate_node "$node"
+  for file in SpeakIP.pm sayip.pl saypublicip.pl shutdown.pl reboot.pl; do
+    [[ -r "${LOCAL_DIR}/${file}" ]] \
+      || die "${LOCAL_DIR}/${file} was not found or is unreadable. Run the full installer to repair this installation."
+  done
+
+  # v1.0.11 changes only DTMF configuration; keep the saved settings, audio,
+  # helpers, and boot service intact. add_dtmf_commands checks conflicts first
+  # and creates a backup before changing rpt.conf.
+  log "Updating existing Speak IP installation for node $node to ${PROGRAM_VERSION}."
+  add_dtmf_commands
+  restart_asterisk
+  log "Speak IP ${PROGRAM_VERSION} update is complete. *894 disconnects all linked nodes."
+}
+
 uninstall_speakip() {
   log "Uninstalling Speak IP..."
 
@@ -869,6 +892,9 @@ main() {
   require_root
 
   case "${1:-}" in
+    --update)
+      update_speakip
+      ;;
     --repair-permissions)
       check_platform
       [[ -f "$CONFIG_FILE" ]] || die "$CONFIG_FILE was not found. Run the installer first."
@@ -892,6 +918,7 @@ $PROGRAM_NAME installer version $PROGRAM_VERSION
 Usage:
   sudo ./install-speakip-v1.0.11.sh
   sudo SPEAKIP_NODE=12345 ./install-speakip-v1.0.11.sh
+  sudo ./install-speakip-v1.0.11.sh --update
   sudo ./install-speakip-v1.0.11.sh --repair-permissions
   sudo ./install-speakip-v1.0.11.sh --repair-rptconf-permissions
   sudo ./install-speakip-v1.0.11.sh --uninstall

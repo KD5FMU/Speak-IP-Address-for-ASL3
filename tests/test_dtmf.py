@@ -107,6 +107,83 @@ class InstallerTests(unittest.TestCase):
                 self.run_functions('id() { return 0; }; check_platform; '
                                    '[[ "$PROGRAM_VERSION" == 1.0.11 ]]', success=supported)
 
+    def prepare_update(self):
+        local = Path(self.temp.name) / 'local'
+        local.mkdir()
+        config = local / 'speakip.conf'
+        config.write_text('NODE=12345\nSOUND_DIR=/custom/sounds\nASTERISK_BIN=/custom/asterisk\n')
+        for name in ('SpeakIP.pm', 'sayip.pl', 'saypublicip.pl', 'shutdown.pl', 'reboot.pl'):
+            (local / name).write_text('# existing helper\n')
+        self.conf.write_text('[functions](functions-main)\n42 = ilink,1\n' +
+                             '\n'.join(COMMANDS[:4]) + '\n')
+        return local
+
+    def update_commands(self):
+        return ('LOCAL_DIR="$(dirname "$RPT_CONF")/local"; '
+                'CONFIG_FILE="$LOCAL_DIR/speakip.conf"; '
+                'require_root() { :; }; check_platform() { :; }; '
+                'systemctl() { '
+                '[[ "$*" == "restart asterisk" ]] || exit 90; '
+                'echo restart >> "$(dirname "$RPT_CONF")/restarts"; }; '
+                'install_packages() { exit 91; }; install_audio_files() { exit 92; }; '
+                'prompt_for_node() { exit 93; }; main --update')
+
+    def test_update_preserves_saved_settings_and_helpers_and_is_repeatable(self):
+        local = self.prepare_update()
+        original = {file: (file.read_bytes(), file.stat().st_mode)
+                    for file in local.iterdir()}
+        for _ in range(2):
+            result = self.run_functions(self.update_commands())
+            self.assertIn('node 12345', result.stdout)
+            lines = self.conf.read_text().splitlines()
+            for entry in COMMANDS:
+                self.assertEqual(lines.count(entry), 1)
+            self.assertIn('42 = ilink,1', lines)
+            for file, (content, mode) in original.items():
+                self.assertEqual(file.read_bytes(), content)
+                self.assertEqual(file.stat().st_mode, mode)
+        self.assertEqual((Path(self.temp.name) / 'restarts').read_text(),
+                         'restart\nrestart\n')
+        self.assertTrue(list(Path(self.temp.name).glob('rpt.conf.speakip-backup-*')))
+
+    def test_update_refuses_incomplete_installation_or_invalid_node(self):
+        local = self.prepare_update()
+        config = local / 'speakip.conf'
+        for contents in ('', 'NODE=not-a-node\n', 'NODE=12345\nNODE=67890\n'):
+            with self.subTest(contents=contents):
+                config.write_text(contents)
+                original = self.conf.read_bytes()
+                result = self.run_functions(self.update_commands(), success=False)
+                self.assertIn("Node number must contain only digits", result.stderr)
+                self.assertEqual(self.conf.read_bytes(), original)
+        config.unlink()
+        result = self.run_functions(self.update_commands(), success=False)
+        self.assertIn("Run the full installer first", result.stderr)
+        config.write_text('NODE=12345\n')
+        (local / 'sayip.pl').unlink()
+        result = self.run_functions(self.update_commands(), success=False)
+        self.assertIn('Run the full installer to repair', result.stderr)
+        self.assertFalse((Path(self.temp.name) / 'restarts').exists())
+        self.assertFalse(list(Path(self.temp.name).glob('rpt.conf.speakip-backup-*')))
+
+    def test_update_conflict_does_not_modify_or_restart(self):
+        self.prepare_update()
+        with self.conf.open('a') as stream:
+            stream.write('894 = ilink,1\n')
+        original = self.conf.read_bytes()
+        result = self.run_functions(self.update_commands(), success=False)
+        self.assertIn("DTMF command 894 is already in use", result.stderr)
+        self.assertEqual(self.conf.read_bytes(), original)
+        self.assertFalse((Path(self.temp.name) / 'restarts').exists())
+        self.assertFalse(list(Path(self.temp.name).glob('rpt.conf.speakip-backup-*')))
+
+    def test_update_never_executes_saved_config_as_shell(self):
+        local = self.prepare_update()
+        sentinel = Path(self.temp.name) / 'executed-config'
+        (local / 'speakip.conf').write_text(f'NODE=12345\ntouch {sentinel}\n')
+        self.run_functions(self.update_commands())
+        self.assertFalse(sentinel.exists())
+
     def test_generated_perl_syntax(self):
         # Stub ownership changes only; generated helpers remain in the temporary directory.
         self.run_functions('LOCAL_DIR="$(dirname "$RPT_CONF")"; '

@@ -60,11 +60,30 @@ I hope you get some use from this setup
 
 ## Upgrade and uninstall
 
-To upgrade from v1.0.10, download and run the v1.0.11 installer above and
-enter the same node number. It backs up `rpt.conf`, replaces the Speak IP
-entries, and adds `894 = ilink,6` to `[functions]`, including inherited
-`[functions](functions-main)` stanzas. Re-running the installer does not
-duplicate its command entries. Installation restarts Asterisk.
+Existing v1.0.10 users can update without a full reinstall. Download the new
+installer and run it with `--update`:
+
+```bash
+cd ~
+wget -O install-speakip-v1.0.11.sh https://raw.githubusercontent.com/KD5FMU/Speak-IP-Address-for-ASL3/refs/heads/main/install-speakip-v1.0.11.sh
+sudo bash ./install-speakip-v1.0.11.sh --update
+```
+
+The updater reads your saved node number from `/etc/asterisk/local/speakip.conf`;
+it does not ask you to enter it again. It preserves that file, the existing
+helpers, audio prompts, and boot service. It does not install or upgrade packages
+or download audio. This update only needs to refresh the DTMF entries.
+
+It backs up `rpt.conf`, replaces the Speak IP entries, and adds `894 = ilink,6`
+to `[functions]`, including inherited `[functions](functions-main)` stanzas.
+It checks for conflicts before modifying the file and restarts Asterisk to load
+the commands, briefly interrupting active connections. Run it during a suitable
+maintenance window. Re-running the updater does not duplicate command entries;
+it also works if v1.0.11 is already installed.
+
+If saved configuration or required helpers are missing, the updater stops and
+asks you to run the full installer. Use the full installation instructions above
+for a new installation or to repair an incomplete one.
 
 The installer checks commands 890–894 before installing packages or helpers
 and refuses to overwrite conflicting definitions, including conflicts hidden
@@ -80,7 +99,7 @@ sudo ./install-speakip-v1.0.11.sh --uninstall
 Uninstall removes the exact Speak IP command entries (including `894 = ilink,6`)
 and helpers, preserves unrelated commands, and leaves `asl3-tts` installed.
 The permissions repair options only repair permissions; run the full installer
-to add `*894`.
+or `--update` to add `*894`.
 
 ## Development validation
 
